@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller Ujian Lab - Dashboard</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        .outfit-font {
+            font-family: 'Outfit', sans-serif;
+        }
+        /* Glassmorphism card */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Custom Glowing and animations */
+        .glow-green {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+        .glow-red {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+        }
+        .glow-blue {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.98); }
+        }
+        .pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden pb-12">
+    <!-- Navbar -->
+    <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl glow-blue shadow-lg shadow-indigo-600/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold outfit-font tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-indigo-400">
+                        CONTROLLER UJIAN LAB
+                    </h1>
+                    <p class="text-xs text-slate-400">Monitoring &amp; Sinkronisasi Browser PC Klien</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden md:block">
+                    <p id="live-clock" class="text-sm font-semibold tracking-wider font-mono text-indigo-400">00:00:00</p>
+                    <p class="text-[10px] text-slate-500 font-mono">15 Juni 2026</p>
+                </div>
+                <!-- Status Mode -->
+                <div id="badge-mode" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-400">
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                    <span>MODE NORMAL</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
+        
+        <!-- TOP: Event configuration & Stats Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Event Control Panel -->
+            <div class="lg:col-span-1 glass-card rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl"></div>
+                <div>
+                    <h2 class="text-lg font-semibold outfit-font mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Kontrol Mode Ujian
+                    </h2>
+                    
+                    <!-- Form Set Event -->
+                    <form id="form-set-jadwal" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">NAMA EVENT UJIAN</label>
+                            <input type="text" name="nama_event" id="input-nama-event" required placeholder="Contoh: UAS Ganjil T.A 2026" 
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">URL TARGET UJIAN</label>
+                            <input type="text" name="url_target" id="input-url-target" required placeholder="Contoh: https://ujian.sekolah.sch.id" 
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-3 px-4 rounded-xl transition duration-150 transform active:scale-95 shadow-lg shadow-indigo-600/20">
+                            Aktifkan Mode Ujian
+                        </button>
+                    </form>
+
+                    <!-- Deactivate Button (Visible when active) -->
+                    <div id="active-event-controls" class="hidden mt-4 pt-4 border-t border-slate-800/80">
+                        <div class="bg-indigo-950/40 border border-indigo-900/50 rounded-xl p-3 mb-4">
+                            <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">EVENT AKTIF SAAT INI</p>
+                            <p id="active-event-name" class="text-sm font-semibold text-slate-100 truncate mt-1">-</p>
+                            <p id="active-event-url" class="text-xs text-slate-400 truncate mt-0.5" style="max-width: 200px;">-</p>
+                        </div>
+                        <button onclick="deactivateUjian()" class="w-full bg-red-600/90 hover:bg-red-500 text-white font-semibold text-sm py-2.5 px-4 rounded-xl transition duration-150 transform active:scale-95 shadow-lg shadow-red-600/20">
+                            Nonaktifkan &amp; Normal
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Statistics -->
+            <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Stat: Total PC -->
+                <div class="glass-card rounded-2xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-slate-600/10 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total PC Terdaftar</p>
+                            <p id="stat-total-pc" class="text-4xl font-extrabold outfit-font mt-2 text-white">0</p>
+                        </div>
+                        <div class="bg-slate-800 text-slate-400 p-2.5 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/80 pt-3">
+                        <span>Pemberian IP Statis &amp; VLAN</span>
+                        <span class="font-mono">7 Lab</span>
+                    </div>
+                </div>
+
+                <!-- Stat: Chrome Terbuka -->
+                <div class="glass-card rounded-2xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden glow-green">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-600/10 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Chrome Sudah Terbuka</p>
+                            <p id="stat-terbuka-pc" class="text-4xl font-extrabold outfit-font mt-2 text-emerald-400">0</p>
+                        </div>
+                        <div class="bg-emerald-950/80 text-emerald-400 p-2.5 rounded-xl border border-emerald-800/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4 border-t border-slate-800/80 pt-3">
+                        <div class="flex justify-between text-xs text-slate-400 mb-1.5">
+                            <span>Persentase Kesiapan</span>
+                            <span id="percent-ready" class="font-bold text-emerald-400">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div id="bar-ready" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat: Chrome Belum Terbuka -->
+                <div class="glass-card rounded-2xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden glow-red">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-rose-600/10 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Chrome Belum Terbuka</p>
+                            <p id="stat-belum-pc" class="text-4xl font-extrabold outfit-font mt-2 text-rose-400">0</p>
+                        </div>
+                        <div class="bg-rose-950/80 text-rose-400 p-2.5 rounded-xl border border-rose-800/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+                        <span>PC Offline / Chrome Belum Launch</span>
+                        <span id="percent-pending" class="text-rose-400 font-bold">100%</span>
+                    </div>
+                </div>
+
+                <!-- Stat: Pings Aktif (Online) -->
+                <div class="glass-card rounded-2xl p-6 shadow-xl flex flex-col justify-between relative overflow-hidden glow-blue">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-blue-600/10 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">PC Online (Ping Aktif)</p>
+                            <p id="stat-online-pc" class="text-4xl font-extrabold outfit-font mt-2 text-blue-400">0</p>
+                        </div>
+                        <div class="bg-blue-950/80 text-blue-400 p-2.5 rounded-xl border border-blue-800/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-3">
+                        <span>Koneksi dalam 60 detik terakhir</span>
+                        <span class="text-blue-400 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-blue-400 rounded-full animate-ping"></span>
+                            Live Poll
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Action Controls -->
+        <div class="glass-card rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <!-- Search & filter -->
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" id="search-pc" placeholder="Cari Nama PC atau IP..." 
+                        class="w-full bg-slate-900 border border-slate-800 focus:border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none transition">
+                </div>
+                <!-- Filter Toggle -->
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="filter-belum-terbuka" class="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-slate-900">
+                    <span class="text-xs text-slate-300">Tampilkan Hanya "Belum Terbuka"</span>
+                </label>
+            </div>
+            <!-- Action buttons -->
+            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+                <button onclick="openWakeOnLanModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold py-2.5 px-4 rounded-xl transition transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Wake-on-LAN Custom
+                </button>
+                <button onclick="resetAllStatus()" class="flex items-center gap-2 bg-red-650/10 hover:bg-red-500/20 text-red-400 border border-red-900/50 text-xs font-semibold py-2.5 px-4 rounded-xl transition transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.28 15H18" />
+                    </svg>
+                    Reset Status Semua PC
+                </button>
+            </div>
+        </div>
+
+        <!-- MIDDLE: Lab Tabs & Grid Monitoring -->
+        <div class="glass-card rounded-3xl overflow-hidden shadow-2xl">
+            <!-- Lab Navigation Tabs -->
+            <div class="border-b border-slate-800 bg-slate-950/40 p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-wrap gap-1" id="lab-tab-list">
+                    <!-- Tab Buttons populated via JS -->
+                </div>
+                <!-- Lab Controls -->
+                <div class="flex items-center gap-3">
+                    <button id="btn-wol-lab" onclick="wakeOnLanLab()" class="flex items-center gap-1.5 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-900/40 text-xs font-semibold py-1.5 px-3 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        WOL Lab Ini
+                    </button>
+                    <button id="btn-reset-lab" onclick="resetLabStatus()" class="flex items-center gap-1.5 bg-red-950/30 hover:bg-red-950/60 text-red-400 border border-red-900/30 text-xs font-semibold py-1.5 px-3 rounded-lg transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.28 15H18" />
+                        </svg>
+                        Reset Lab Ini
+                    </button>
+                </div>
+            </div>
+
+            <!-- Monitoring Grid -->
+            <div class="p-6">
+                <!-- Active Lab Label -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="active-lab-title" class="text-base font-bold outfit-font text-slate-300">LAB 1 (VLAN 10)</h3>
+                    <span id="lab-counter" class="text-xs text-slate-500 font-medium">Loading PCs...</span>
+                </div>
+                <!-- PC Grid -->
+                <div id="pc-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4">
+                    <!-- PC Cards populated via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM: Event History List -->
+        <div class="glass-card rounded-2xl p-6 shadow-xl">
+            <h3 class="text-lg font-semibold outfit-font mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Riwayat Event Ujian
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-800 text-sm">
+                    <thead>
+                        <tr class="text-slate-400 text-left">
+                            <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Nama Event</th>
+                            <th class="pb-3 font-semibold uppercase tracking-wider text-xs">URL Target</th>
+                            <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Waktu Dibuat</th>
+                            <th class="pb-3 font-semibold uppercase tracking-wider text-xs">Status</th>
+                            <th class="pb-3 font-semibold uppercase tracking-wider text-xs text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body" class="divide-y divide-slate-800/50 text-slate-300">
+                        <!-- Table rows populated via JS -->
+                        <tr>
+                            <td colspan="5" class="py-4 text-center text-slate-500 text-xs">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Wake On Lan Custom -->
+    <div id="wol-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-card w-full max-w-md rounded-2xl p-6 shadow-2xl transform scale-95 transition-all duration-300">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-bold outfit-font text-white">Wake-on-LAN Kustom</h3>
+                <button onclick="closeWakeOnLanModal()" class="text-slate-400 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="form-wol-custom" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">TIPE TARGET</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-xl p-3 flex items-center justify-center cursor-pointer select-none text-sm text-slate-200">
+                            <input type="radio" name="target_type" value="single" checked class="mr-2 text-indigo-600 focus:ring-0 focus:ring-offset-0 bg-slate-950" onchange="toggleWolModalFields()">
+                            PC Tunggal
+                        </label>
+                        <label class="bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-xl p-3 flex items-center justify-center cursor-pointer select-none text-sm text-slate-200">
+                            <input type="radio" name="target_type" value="lab" class="mr-2 text-indigo-600 focus:ring-0 focus:ring-offset-0 bg-slate-950" onchange="toggleWolModalFields()">
+                            Satu Lab (VLAN)
+                        </label>
+                    </div>
+                </div>
+
+                <div id="wol-field-mac">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">MAC ADDRESS TARGET</label>
+                    <input type="text" id="input-wol-mac" placeholder="Contoh: 00:1A:2B:3C:4D:5E" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+
+                <div id="wol-field-vlan" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">LAB / VLAN ID</label>
+                    <select id="select-wol-vlan" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 transition">
+                        <option value="10">Lab 1 (VLAN 10)</option>
+                        <option value="20">Lab 2 (VLAN 20)</option>
+                        <option value="30">Lab 3 (VLAN 30)</option>
+                        <option value="40">Lab 4 (VLAN 40)</option>
+                        <option value="50">Lab 5 (VLAN 50)</option>
+                        <option value="60">Lab 6 (VLAN 60)</option>
+                        <option value="70">Lab 7 (VLAN 70)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-3 px-4 rounded-xl transition duration-150 transform active:scale-95 shadow-lg shadow-indigo-600/20">
+                    Kirim Sinyal Bangun (WOL)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alert Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-slate-900 border border-slate-800 text-sm font-medium px-4 py-3 rounded-xl shadow-2xl opacity-0 transform translate-y-4 pointer-events-none transition-all duration-300">
+        <div id="toast-icon" class="text-emerald-400 bg-emerald-950/80 border border-emerald-800/40 p-1.5 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+            </svg>
+        </div>
+        <span id="toast-message" class="text-slate-200">Notifikasi</span>
+    </div>
+
+    <!-- Script Application -->
+    <script>
+        // Global variables
+        let currentLabId = "10"; // Default to Lab 1 (VLAN 10)
+        let pcsData = [];
+        let activeJadwal = null;
+        const labs = [
+            { id: "10", name: "LAB 1" },
+            { id: "20", name: "LAB 2" },
+            { id: "30", name: "LAB 3" },
+            { id: "40", name: "LAB 4" },
+            { id: "50", name: "LAB 5" },
+            { id: "60", name: "LAB 6" },
+            { id: "70", name: "LAB 7" }
+        ];
+
+        // Parse date string safe from timezone shifts
+        function parseDateString(dateString) {
+            if (!dateString) return null;
+            const t = dateString.split(/[- :]/);
+            return new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
+        }
+
+        // Format dates beautifully
+        function formatRelativeTime(dateString) {
+            if (!dateString) return "Never pinged";
+            
+            const date = parseDateString(dateString);
+            const refDate = serverTime ? parseDateString(serverTime) : new Date();
+            const diffMs = refDate - date;
+            const diffSec = Math.floor(diffMs / 1000);
+            
+            if (diffSec < 0) return "Just now";
+            if (diffSec < 5) return "Just now";
+            if (diffSec < 60) return `${diffSec}s ago`;
+            const diffMin = Math.floor(diffSec / 60);
+            if (diffMin < 60) return `${diffMin}m ago`;
+            const diffHr = Math.floor(diffMin / 60);
+            if (diffHr < 24) return `${diffHr}h ago`;
+            return date.toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Live digital clock
+        function startClock() {
+            const clock = document.getElementById("live-clock");
+            setInterval(() => {
+                const now = new Date();
+                clock.textContent = now.toLocaleTimeString("id-ID", { hour12: false });
+            }, 1000);
+        }
+
+        // Toast notifications
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById("toast");
+            const toastMsg = document.getElementById("toast-message");
+            const toastIcon = document.getElementById("toast-icon");
+            
+            toastMsg.textContent = message;
+            if (isSuccess) {
+                toastIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" /></svg>`;
+                toastIcon.className = "text-emerald-400 bg-emerald-950/80 border border-emerald-800/40 p-1.5 rounded-lg";
+            } else {
+                toastIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>`;
+                toastIcon.className = "text-rose-400 bg-rose-950/80 border border-rose-800/40 p-1.5 rounded-lg";
+            }
+            
+            toast.classList.remove("opacity-0", "translate-y-4", "pointer-events-none");
+            
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "translate-y-4", "pointer-events-none");
+            }, 4000);
+        }
+
+        // Initialize Tab Navigation
+        function renderTabs() {
+            const tabList = document.getElementById("lab-tab-list");
+            tabList.innerHTML = labs.map(lab => {
+                const isActive = lab.id === currentLabId;
+                return `
+                    <button onclick="switchLab('${lab.id}')" id="tab-${lab.id}" 
+                        class="px-4 py-2 rounded-lg text-xs font-semibold transition border duration-200 ${
+                            isActive 
+                            ? 'bg-indigo-600 text-white border-indigo-500 glow-blue' 
+                            : 'bg-slate-900/40 text-slate-400 border-slate-800/80 hover:text-slate-200 hover:bg-slate-800'
+                        }">
+                        ${lab.name}
+                    </button>
+                `;
+            }).join("");
+        }
+
+        // Switch Lab Tab
+        function switchLab(vlanId) {
+            currentLabId = vlanId;
+            renderTabs();
+            
+            const lab = labs.find(l => l.id === vlanId);
+            document.getElementById("active-lab-title").textContent = `${lab.name} (VLAN ${vlanId})`;
+            
+            renderPCGrid();
+        }
+
+        // Render Monitoring Grid
+        function renderPCGrid() {
+            const grid = document.getElementById("pc-grid");
+            const searchVal = document.getElementById("search-pc").value.toLowerCase();
+            const filterUnopened = document.getElementById("filter-belum-terbuka").checked;
+            
+            // Filter PCs by VLAN and Search Value and Unopened checkbox
+            let filteredPcs = pcsData.filter(pc => pc.vlan_id === currentLabId);
+            
+            if (searchVal) {
+                filteredPcs = filteredPcs.filter(pc => 
+                    pc.nama_pc.toLowerCase().includes(searchVal) || 
+                    pc.ip_address.includes(searchVal)
+                );
+            }
+            
+            if (filterUnopened) {
+                filteredPcs = filteredPcs.filter(pc => pc.status_chrome === "Belum Terbuka");
+            }
+            
+            document.getElementById("lab-counter").textContent = `Menampilkan ${filteredPcs.length} dari ${pcsData.filter(pc => pc.vlan_id === currentLabId).length} PC`;
+
+            if (filteredPcs.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-8 text-center text-slate-500 text-sm">
+                        Tidak ada PC yang cocok dengan filter / kosong.
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredPcs.map(pc => {
+                const isReady = pc.status_chrome === "Sudah Terbuka";
+                
+                // Determine if Online (pinged within last 60 seconds relative to server time)
+                let isOnline = false;
+                if (pc.last_ping) {
+                    const lastPingDate = parseDateString(pc.last_ping);
+                    const refDate = serverTime ? parseDateString(serverTime) : new Date();
+                    const diffMs = refDate - lastPingDate;
+                    isOnline = diffMs < 60 * 1000;
+                }
+
+                // Cards themes based on status
+                let cardClass = "";
+                let indicatorCircle = "";
+                let badgeText = "";
+                let badgeClass = "";
+                
+                if (!isOnline) {
+                    // PC Offline
+                    cardClass = "border-slate-800/80 bg-slate-950/25 text-slate-500 opacity-60 hover:border-slate-800";
+                    indicatorCircle = "bg-slate-700";
+                    badgeText = "OFFLINE";
+                    badgeClass = "bg-slate-900/80 text-slate-500";
+                } else if (isReady) {
+                    // PC Online & Chrome Open
+                    cardClass = "border-emerald-500/30 bg-emerald-950/15 hover:border-emerald-500 hover:bg-emerald-950/30 text-emerald-300 glow-green";
+                    indicatorCircle = "bg-emerald-400 shadow-lg shadow-emerald-500/50 animate-pulse";
+                    badgeText = "READY";
+                    badgeClass = "bg-emerald-950/80 text-emerald-400";
+                } else if (pc.is_locked === 1) {
+                    // PC Online & Locked (violating focus)
+                    cardClass = "border-rose-500/30 bg-rose-950/15 hover:border-rose-500 hover:bg-rose-950/30 text-rose-300 glow-red animate-pulse";
+                    indicatorCircle = "bg-rose-500 shadow-lg shadow-rose-500/50";
+                    badgeText = "LOCKED";
+                    badgeClass = "bg-rose-950/80 text-rose-400";
+                } else {
+                    // PC Online & Chrome Not Open yet
+                    cardClass = "border-blue-500/30 bg-blue-950/10 hover:border-blue-500 hover:bg-blue-950/20 text-blue-300 glow-blue";
+                    indicatorCircle = "bg-blue-400 shadow-lg shadow-blue-500/50";
+                    badgeText = "ONLINE";
+                    badgeClass = "bg-blue-950/80 text-blue-400";
+                }
+
+                // Relative ping string
+                const relativePing = formatRelativeTime(pc.last_ping);
+
+                return `
+                    <div class="relative border rounded-xl p-3.5 transition duration-300 flex flex-col justify-between h-28 group overflow-hidden ${cardClass}">
+                        <div class="absolute -right-6 -bottom-6 w-12 h-12 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-all duration-300"></div>
+                        
+                        <!-- Header slot -->
+                        <div class="flex justify-between items-start gap-1">
+                            <span class="text-xs font-bold font-mono tracking-wider text-slate-400 group-hover:text-white transition duration-150">${pc.nama_pc}</span>
+                            <span class="w-2 h-2 rounded-full ${indicatorCircle}"></span>
+                        </div>
+                        
+                        <!-- Middle Slot: IP / MAC -->
+                        <div class="space-y-0.5 mt-2">
+                            <p class="text-[10px] font-mono text-slate-500 group-hover:text-slate-300 transition duration-150">${pc.ip_address}</p>
+                            <p class="text-[9px] font-mono text-slate-600 group-hover:text-slate-400 transition duration-150 uppercase">${pc.mac_address || 'NO MAC'}</p>
+                        </div>
+                        
+                        <!-- Footer: last ping & WOL trigger -->
+                        <div class="mt-2 pt-2 border-t border-slate-800/50 flex justify-between items-center text-[9px] text-slate-500">
+                            <span class="font-mono truncate mr-1" title="${pc.last_ping || 'Belum pernah PING'}">${relativePing}</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-1 py-0.5 rounded text-[8px] font-bold ${badgeClass}">${badgeText}</span>
+                                ${pc.mac_address ? `
+                                    <button onclick="wakeOnLanSingle('${pc.mac_address}')" title="Bangunkan PC" class="text-slate-500 hover:text-indigo-400 transition p-0.5 rounded bg-slate-900/50 border border-slate-800 hover:border-slate-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        // Fetch Live PC statuses
+        async function fetchStatus() {
+            try {
+                const response = await fetch("/api/status-pc");
+                if (!response.ok) throw new Error("Gagal mengambil data status");
+                const data = await response.json();
+                
+                pcsData = data.pcs;
+                activeJadwal = data.active_jadwal;
+                serverTime = data.server_time;
+                
+                updateStats();
+                updateActiveModeBadge();
+                renderPCGrid();
+            } catch (err) {
+                console.error("Poller Error:", err);
+            }
+        }
+
+        // Update Statistics Cards
+        function updateStats() {
+            const total = pcsData.length;
+            const terbuka = pcsData.filter(pc => {
+                if (!pc.last_ping) return false;
+                const lastPingDate = parseDateString(pc.last_ping);
+                const refDate = serverTime ? parseDateString(serverTime) : new Date();
+                const isOnline = (refDate - lastPingDate) < 60 * 1000;
+                return isOnline && pc.status_chrome === "Sudah Terbuka";
+            }).length;
+            const belum = total - terbuka;
+            
+            // Calculate active pings (within 60s)
+            let online = 0;
+            const refDate = serverTime ? parseDateString(serverTime) : new Date();
+            pcsData.forEach(pc => {
+                if (pc.last_ping) {
+                    const lastPingDate = parseDateString(pc.last_ping);
+                    if ((refDate - lastPingDate) < 60 * 1000) online++;
+                }
+            });
+
+            document.getElementById("stat-total-pc").textContent = total;
+            document.getElementById("stat-terbuka-pc").textContent = terbuka;
+            document.getElementById("stat-belum-pc").textContent = belum;
+            document.getElementById("stat-online-pc").textContent = online;
+
+            // Update Progress Bar
+            const percentReady = total > 0 ? Math.round((terbuka / total) * 100) : 0;
+            document.getElementById("percent-ready").textContent = `${percentReady}%`;
+            document.getElementById("bar-ready").style.width = `${percentReady}%`;
+            
+            const percentPending = total > 0 ? Math.round((belum / total) * 100) : 100;
+            document.getElementById("percent-pending").textContent = `${percentPending}%`;
+        }
+
+        // Update Exam Mode Badges
+        function updateActiveModeBadge() {
+            const badge = document.getElementById("badge-mode");
+            const activeForm = document.getElementById("form-set-jadwal");
+            const activeControls = document.getElementById("active-event-controls");
+            const activeName = document.getElementById("active-event-name");
+            const activeUrl = document.getElementById("active-event-url");
+            
+            if (activeJadwal) {
+                badge.innerHTML = `
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="text-emerald-400">MODE UJIAN AKTIF</span>
+                `;
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-950/60 border border-emerald-900/50 text-emerald-400";
+                
+                // Hide set-jadwal form submit, show control info
+                activeControls.classList.remove("hidden");
+                activeName.textContent = activeJadwal.nama_event;
+                activeUrl.textContent = activeJadwal.url_target;
+                
+                // Prefill inputs but disable them
+                document.getElementById("input-nama-event").value = activeJadwal.nama_event;
+                document.getElementById("input-nama-event").disabled = true;
+                document.getElementById("input-url-target").value = activeJadwal.url_target;
+                document.getElementById("input-url-target").disabled = true;
+                activeForm.querySelector("button[type='submit']").classList.add("hidden");
+            } else {
+                badge.innerHTML = `
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                    <span>MODE NORMAL</span>
+                `;
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-400";
+                
+                activeControls.classList.add("hidden");
+                
+                // Re-enable form
+                document.getElementById("input-nama-event").value = "";
+                document.getElementById("input-nama-event").disabled = false;
+                document.getElementById("input-url-target").value = "";
+                document.getElementById("input-url-target").disabled = false;
+                activeForm.querySelector("button[type='submit']").classList.remove("hidden");
+            }
+        }
+
+        // Fetch exam schedules history
+        async function fetchHistory() {
+            try {
+                const response = await fetch("/api/get-jadwal");
+                const history = await response.json();
+                
+                const tbody = document.getElementById("history-table-body");
+                if (history.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-500 text-xs">Belum ada riwayat event.</td></tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = history.map(h => {
+                    const isActive = h.status === 'Active';
+                    const badge = isActive 
+                        ? `<span class="bg-emerald-950 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded text-[10px] font-bold">AKTIF</span>` 
+                        : `<span class="bg-slate-900 text-slate-400 border border-slate-800 px-2 py-0.5 rounded text-[10px] font-medium">SELESAI</span>`;
+                    return `
+                        <tr class="hover:bg-slate-900/30 transition">
+                            <td class="py-3 font-semibold text-slate-200">${h.nama_event}</td>
+                            <td class="py-3 font-mono text-indigo-400 text-xs truncate" style="max-width: 250px;"><a href="${h.url_target}" target="_blank" class="hover:underline">${h.url_target}</a></td>
+                            <td class="py-3 text-slate-400 text-xs">${h.created_at}</td>
+                            <td class="py-3">${badge}</td>
+                            <td class="py-3 text-right">
+                                <button onclick="deleteHistory(${h.id})" class="text-rose-400 hover:text-rose-300 p-1 text-xs border border-rose-950 hover:bg-rose-950/40 rounded transition">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
+            } catch (err) {
+                console.error("History fetch error:", err);
+            }
+        }
+
+        // Activate Exam Event (Submit Form)
+        document.getElementById("form-set-jadwal").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch("/api/set-jadwal", {
+                    method: "POST",
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                    fetchStatus();
+                    fetchHistory();
+                } else {
+                    showToast(result.detail || "Gagal mengaktifkan mode ujian", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        });
+
+        // Deactivate Exam Event
+        async function deactivateUjian() {
+            try {
+                const response = await fetch("/api/deactivate-jadwal", {
+                    method: "POST"
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                    fetchStatus();
+                    fetchHistory();
+                } else {
+                    showToast("Gagal menonaktifkan mode ujian", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        }
+
+        // Delete Event History
+        async function deleteHistory(id) {
+            if (!confirm("Hapus catatan riwayat ujian ini?")) return;
+            try {
+                const response = await fetch(`/api/delete-jadwal/${id}`, {
+                    method: "POST"
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                    fetchHistory();
+                    fetchStatus(); // Just in case it was active
+                } else {
+                    showToast("Gagal menghapus riwayat", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        }
+
+        // Reset All PC status
+        async function resetAllStatus() {
+            if (!confirm("Peringatan! Ini akan mereset status 'Sudah Terbuka' semua PC kembali ke 'Belum Terbuka'. Lanjutkan?")) return;
+            try {
+                const response = await fetch("/api/reset-status", {
+                    method: "POST"
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                    fetchStatus();
+                } else {
+                    showToast("Gagal mereset status PC", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        }
+
+        // Reset Lab status
+        async function resetLabStatus() {
+            const lab = labs.find(l => l.id === currentLabId);
+            if (!confirm(`Reset semua status PC di ${lab.name} kembali ke 'Belum Terbuka'?`)) return;
+            
+            try {
+                const response = await fetch(`/api/reset-status-lab/${currentLabId}`, {
+                    method: "POST"
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                    fetchStatus();
+                } else {
+                    showToast("Gagal mereset status lab", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        }
+
+        // Wake on LAN Lab
+        async function wakeOnLanLab() {
+            const lab = labs.find(l => l.id === currentLabId);
+            if (!confirm(`Kirim sinyal Wake-on-LAN ke seluruh PC di ${lab.name} (VLAN ${currentLabId})?`)) return;
+            
+            const body = new FormData();
+            body.append("target_type", "lab");
+            body.append("vlan_id", currentLabId);
+            
+            try {
+                const response = await fetch("/api/wake-on-lan", {
+                    method: "POST",
+                    body: body
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                } else {
+                    showToast(result.message || "Gagal mengirim WOL", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        }
+
+        // Wake on LAN Single PC
+        async function wakeOnLanSingle(mac) {
+            const body = new FormData();
+            body.append("target_type", "single");
+            body.append("mac_address", mac);
+            
+            try {
+                const response = await fetch("/api/wake-on-lan", {
+                    method: "POST",
+                    body: body
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                } else {
+                    showToast(result.message || "Gagal mengirim WOL", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        }
+
+        // Custom WOL Modal controls
+        function openWakeOnLanModal() {
+            const modal = document.getElementById("wol-modal");
+            modal.classList.remove("opacity-0", "pointer-events-none");
+            modal.querySelector(".scale-95").classList.remove("scale-95");
+        }
+
+        function closeWakeOnLanModal() {
+            const modal = document.getElementById("wol-modal");
+            modal.classList.add("opacity-0", "pointer-events-none");
+            modal.querySelector(".glass-card").classList.add("scale-95");
+        }
+
+        function toggleWolModalFields() {
+            const targetType = document.querySelector("input[name='target_type']:checked").value;
+            const macField = document.getElementById("wol-field-mac");
+            const vlanField = document.getElementById("wol-field-vlan");
+            
+            if (targetType === "single") {
+                macField.classList.remove("hidden");
+                vlanField.classList.add("hidden");
+            } else {
+                macField.classList.add("hidden");
+                vlanField.classList.remove("hidden");
+            }
+        }
+
+        // Submit Custom WOL Form
+        document.getElementById("form-wol-custom").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const targetType = document.querySelector("input[name='target_type']:checked").value;
+            const mac = document.getElementById("input-wol-mac").value;
+            const vlan = document.getElementById("select-wol-vlan").value;
+            
+            const body = new FormData();
+            body.append("target_type", targetType);
+            if (targetType === "single") {
+                if (!mac) {
+                    showToast("MAC Address wajib diisi untuk PC tunggal", false);
+                    return;
+                }
+                body.append("mac_address", mac);
+            } else {
+                body.append("vlan_id", vlan);
+            }
+            
+            try {
+                const response = await fetch("/api/wake-on-lan", {
+                    method: "POST",
+                    body: body
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast(result.message);
+                    closeWakeOnLanModal();
+                } else {
+                    showToast(result.message || "Gagal memproses WOL", false);
+                }
+            } catch (err) {
+                showToast("Kesalahan koneksi ke server", false);
+            }
+        });
+
+        // Search & Filter listeners
+        document.getElementById("search-pc").addEventListener("input", renderPCGrid);
+        document.getElementById("filter-belum-terbuka").addEventListener("change", renderPCGrid);
+
+        // Initial setup
+        window.addEventListener("DOMContentLoaded", () => {
+            startClock();
+            renderTabs();
+            
+            // Initial fetches
+            fetchStatus();
+            fetchHistory();
+            
+            // Poll for status every 3 seconds
+            setInterval(fetchStatus, 3000);
+            // Poll history every 10 seconds (less critical)
+            setInterval(fetchHistory, 10000);
+        });
+    </script>
+</body>
+</html>

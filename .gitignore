@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Android Build Tools and SDKs
+android_build_tools/
+
+# Android Gradle / Studio
+.gradle/
+build/
+app/build/
+*.iml
+.idea/
+local.properties
+
+# PHP Composer
+vendor/
+
+# CodeIgniter 4
+writable/
+.env
+
+# SQLite Databases
+*.db
+*.db-journal

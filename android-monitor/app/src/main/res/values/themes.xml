@@ -1,0 +1,22 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.KioskMonitor" parent="Theme.MaterialComponents.DayNight">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/smk_blue</item>
+        <item name="colorPrimaryVariant">@color/smk_blue_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/smk_blue</item>
+        <item name="colorSecondaryVariant">@color/smk_blue_dark</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/smk_bg_dark</item>
+        <!-- Background color. -->
+        <item name="android:windowBackground">@color/smk_bg_dark</item>
+    </style>
+
+    <style name="Theme.KioskMonitor.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>

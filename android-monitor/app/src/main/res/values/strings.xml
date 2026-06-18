@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Kiosk Monitor</string>
+    <string name="title_activity_settings">Pengaturan Server</string>
+    <string name="server_url_hint">http://192.168.60.158:8000</string>
+    <string name="btn_save">Simpan Konfigurasi</string>
+    <string name="txt_input_label">IP / URL Server Ujian:</string>
+    <string name="error_empty_url">URL Server tidak boleh kosong!</string>
+    <string name="success_save">Konfigurasi berhasil disimpan!</string>
+    <string name="error_connection">Gagal terhubung ke Server. Tarik ke bawah untuk memuat ulang.</string>
+</resources>
