@@ -16,4 +16,4 @@ $routes->post('api/update-pc', 'Dashboard::updatePc');
 $routes->post('api/update-vlan-config', 'Dashboard::updateVlanConfig');
 $routes->post('api/delete-pc', 'Dashboard::deletePc');
 $routes->post('api/delete-all-pcs', 'Dashboard::deleteAllPcs');
-
+$routes->get('start', 'Dashboard::startUjian');

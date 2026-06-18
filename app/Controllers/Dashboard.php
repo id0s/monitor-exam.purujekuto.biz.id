@@ -682,4 +682,50 @@ class Dashboard extends BaseController
             return $this->fail($e->getMessage(), 500);
         }
     }
+
+    /**
+     * Client landing page: GET /start
+     * Redirects to the active exam URL and updates PC status to "Sudah Terbuka"
+     */
+    public function startUjian()
+    {
+        $now = date('Y-m-d H:i:s');
+        $ip = $this->request->getIPAddress();
+        $vlanId = $this->autoDetectVlan($ip, '');
+        
+        $activeJadwal = $this->jadwalModel->where('status', 'Active')
+                                         ->where('waktu_mulai <=', $now)
+                                         ->where('waktu_selesai >=', $now)
+                                         ->groupStart()
+                                             ->where('target_lab', $vlanId)
+                                             ->orWhere('target_lab', 'ALL')
+                                         ->groupEnd()
+                                         ->orderBy("CASE WHEN target_lab = 'ALL' THEN 1 ELSE 0 END", "ASC")
+                                         ->first();
+                                         
+        if ($activeJadwal) {
+            $pcName = "PC-" . str_replace('.', '-', $ip);
+            $pc = $this->pcModel->find($ip);
+            if ($pc) {
+                $this->pcModel->update($ip, [
+                    'status_chrome' => 'Sudah Terbuka',
+                    'last_ping'     => $now
+                ]);
+            } else {
+                $this->pcModel->insert([
+                    'ip_address'    => $ip,
+                    'mac_address'   => '',
+                    'nama_pc'       => $pcName,
+                    'vlan_id'       => $vlanId,
+                    'status_chrome' => 'Sudah Terbuka',
+                    'is_locked'     => 0,
+                    'last_ping'     => $now
+                ]);
+            }
+            
+            return redirect()->to($activeJadwal['url_target']);
+        }
+        
+        return "<html><body style='background-color:#0f172a; color:#e2e8f0; font-family:sans-serif; text-align:center; padding-top:20%;'><h2>Belum ada ujian aktif untuk Lab Anda. Silakan hubungi pengawas.</h2></body></html>";
+    }
 }
